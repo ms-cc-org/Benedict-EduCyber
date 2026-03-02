@@ -87,6 +87,12 @@ The system collects:
 
 The project is designed to make collected datasets as anonymous as possible while preserving research utility.
 
+## Repo Structure
+
+/docs --> Architecture and governance documentation
+/landing-page --> GitHub Pages site source
+/architecture --> System diagrams
+
 
 ## License
 
