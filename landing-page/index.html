@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benedict EduCyber</title>
+    <style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f9fafb;
+        color: #111;
+    }
+
+    header {
+        text-align: center;
+        padding: 80px 20px;
+        background-color: #4b2e83; /* Benedict purple */
+        color: white;
+    }
+
+    header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+
+    header p {
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto 30px;
+    }
+
+    button {
+        padding: 12px 24px;
+        font-size: 1rem;
+        background-color: #f4c542; /* gold */
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #222;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background-color: #ddb233;
+    }
+
+    section {
+        padding: 60px 20px;
+        max-width: 800px;
+        margin: auto;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #4b2e83;
+    }
+
+    .steps {
+        line-height: 1.8;
+    }
+</style>
+</head>
+<body>
+    <header>
+        <img src="Benedict_logo.png" alt="Benedict College Logo" style="width:120px; margin-bottom:20px;">
+        <h1>Benedict EduCyber</h1>
+
+        <p>A deterministic agent designed to provide personalized learning experiences. Main purpose is to support Benedict College students 
+        through guided, Socratic learning and interactive feedback.
+        </p>
+
+        <button id="launch-chatbot">Launch Chatbot</button>
+    </header>
+
+    <section>
+        <h2>How It Works</h2>
+
+        <div class="steps">
+            <p>1. Sign in securely using your Google account.</p>
+            <p>2. Launch the AI tutor and begin your session.</p>
+            <p>3. The chatbot guides you using Socratic questioning.</p>
+            <p>4. Your interaction helps improve learning and research.</p>
+            <p>5. After your session, you’ll be asked to provide feedback.</p>
+        </div>
+    </section>
+
+    <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+<script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+<button id="close-chatbot" style="
+  display:none;
+  position:fixed;
+  bottom:90px;
+  right:20px;
+  z-index:1000;
+  background-color:#4b2e83;
+  color:white;
+  border:none;
+  border-radius:50%;
+  width:35px;
+  height:35px;
+  font-size:18px;
+  cursor:pointer;
+">
+  X
+</button>
+<df-messenger
+  location="us-central1"
+  project-id="ms-cc-benedict-college-chatbot"
+  agent-id="598d363a-8270-4106-9e3a-2a38689ea03f"
+  language-code="en"
+  max-query-length="-1"
+  allow-feedback="all">
+  <df-messenger-chat
+    chat-title="EduCyber_d1">
+  </df-messenger-chat>
+</df-messenger>
+<style>
+  df-messenger {
+    display: none;
+    z-index: 999;
+    position: fixed;
+    --df-messenger-font-color: #000;
+    --df-messenger-font-family: Google Sans;
+    --df-messenger-chat-background: #f3f6fc;
+    --df-messenger-message-user-background: #d3e3fd;
+    --df-messenger-message-bot-background: #fff;
+    bottom: 0;
+    right: 0;
+    top: 0;
+    width: 450px;
+  }
+</style>
+
+<script>
+    const launchBtn = document.getElementById("launch-chatbot");
+    const closeBtn = document.getElementById("close-chatbot");
+    const chatbot = document.querySelector("df-messenger");
+
+    launchBtn.addEventListener("click", () => {
+        chatbot.style.display = "block";
+        closeBtn.style.display = "block";
+    });
+
+    closeBtn.addEventListener("click", () => {
+        const confirmClose = confirm("Are you sure you want to close the chat?");
+
+        if (confirmClose) {
+            chatbot.style.display = "none";
+            closeBtn.style.display = "none";
+        }
+    });
+</script>
+
+
+</body>
+</html>
