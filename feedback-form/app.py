@@ -30,8 +30,11 @@ def submit_feedback():
     guidance_style = data.get("guidance_style")
     comment = data.get("comment")
     session_id = data.get("session_id")
-    page_link = data.get("page_link", "")
+    page_url = data.get("page_url", "")
     form_version = data.get("form_version", "v1")
+
+    print("ENV VARS:", Project_ID, Dataset_ID, Table_ID, flush=True)
+    print("TABLE REFERENCE BEING USED:", table_reference, flush=True)
 
     if session_id is None or helpfulness_score is None or guidance_style is None:
         return jsonify({"error": "Required fields are missing"}), 400
@@ -45,12 +48,12 @@ def submit_feedback():
     
     row = {
         "feedback_id": str(uuid.uuid4()),
-        "submitted_time": datetime.now(timezone.utc).isoformat(),
+        "submitted_at": datetime.now(timezone.utc).isoformat(),
         "session_id": session_id,
         "helpfulness_score": helpfulness_score,
         "guidance_style": guidance_style,
         "comment": comment,
-        "page_link": page_link,
+        "page_url": page_url,
         "form_version": form_version
     }
 
@@ -61,4 +64,4 @@ def submit_feedback():
     return jsonify({"status": "success", "message": "Feedback submitted successfully"}), 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)
