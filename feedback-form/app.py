@@ -2,7 +2,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, request, jsonify
 from google.cloud import bigquery
 
 app = Flask(__name__)
@@ -21,6 +21,10 @@ def health():
         "status": "ok",
         "time": datetime.now(timezone.utc).isoformat()
     }, 200
+
+@app.route('/', methods=['GET'])
+def home():
+    return {"status": "API is running"}
 
 @app.post("/submit-feedback")
 def submit_feedback():

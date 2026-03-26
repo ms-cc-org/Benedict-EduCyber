@@ -133,22 +133,97 @@
   }
 </style>
 
+<div id="feedbackForm" style="display: none; border: 2px solid #ccc; padding: 20px; margin: 20px; background: #fff;">
+
+    <h3>Quick Feedback after the chat</h3>
+    <label>how helpful was the chatbot in resolving your questions?</label>
+    <select id="helpfulnessScore">
+        <option value="1">1 - Not helpful</option>
+        <option value="2">2 - Slightly helpful</option>
+        <option value="3">3 - Moderately helpful</option>
+        <option value="4">4 - Very helpful</option>
+        <option value="5">5 - Extremely helpful</option>
+    </select>
+    <br><br>
+    <label>Did the chatbot guide you step by step?</label>
+    <select id="guidanceStyle">
+        <option value="Yes">Yes</option>
+        <option value="Neutral">Neutral</option>
+        <option value="No">No</option>
+    </select>
+    <br><br>
+    <label>Any additional comments or suggestions?</label>
+    <textarea id="comment"></textarea>
+
+    <button onclick="submitFeedback()">Submit</button>
+</div>
+
 <script>
-    const launchBtn = document.getElementById("launch-chatbot");
-    const closeBtn = document.getElementById("close-chatbot");
-    const chatbot = document.querySelector("df-messenger");
+    document.addEventListener("DOMContentLoaded", () => {
+        window.addEventListener("df-chat-open-changed", (event) => {
+            if (!event.detail.isOpen) {
+                openFeedbackForm();
+            }
+        })
 
-    launchBtn.addEventListener("click", () => {
-        chatbot.style.display = "block";
-        closeBtn.style.display = "block";
-    });
+        const launchBtn = document.getElementById("launch-chatbot");
+        const closeBtn = document.getElementById("close-chatbot");
+        const chatbot = document.querySelector("df-messenger");
 
-    closeBtn.addEventListener("click", () => {
-        const confirmClose = confirm("Are you sure you want to close the chat?");
+        launchBtn.addEventListener("click", () => {
+            chatbot.style.display = "block";
+            closeBtn.style.display = "block";
+        });
 
-        if (confirmClose) {
-            chatbot.style.display = "none";
-            closeBtn.style.display = "none";
+        closeBtn.addEventListener("click", () => {
+            const confirmClose = confirm("Are you sure you want to close the chat?");
+
+            if (confirmClose) {
+                chatbot.style.display = "none";
+                closeBtn.style.display = "none";
+
+                window.dispatchEvent(new CustomEvent("df-chat-open-changed", {
+                    detail: { isOpen: false }
+                }));
+            }
+        });
+
+        function getOrCreateSessionId() {
+            let sessionId = localStorage.getItem("sessionId");
+            if (!sessionId) {
+                sessionId = "user-" + crypto.randomUUID();
+                localStorage.setItem("sessionId", sessionId);
+            }
+            return sessionId;
+        }
+
+        const sessionId = getOrCreateSessionId();
+
+        function openFeedbackForm() {
+            document.getElementById("feedbackForm").style.display = "block";
+        }
+
+        async function submitFeedback() {
+            const payload = {
+                sessionId: sessionId,
+                helpfulnessScore: parseInt(document.getElementById("helpfulnessScore").value,10),
+                guidanceStyle: document.getElementById("guidanceStyle").value,
+                comment: document.getElementById("comment").value,
+                page_url: window.location.href,
+                form_verision: "v1"
+            };
+        
+
+            const response = await fetch("https://educyber-feedback-api-142373140699.us-central1.run.app/submit-feedback", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            console.log("Feedback submitted:", result);
         }
     });
 </script>
