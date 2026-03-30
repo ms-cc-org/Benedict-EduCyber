@@ -15,6 +15,14 @@ client = bigquery.Client(project=Project_ID)
 
 table_reference = f"{Project_ID}.{Dataset_ID}.{Table_ID}"
 
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    return response
+
 @app.get("/health")
 def health():
     return {
@@ -26,16 +34,19 @@ def health():
 def home():
     return {"status": "API is running"}
 
-@app.post("/submit-feedback")
+@app.route("/submit-feedback", methods=["POST", "OPTIONS"])
 def submit_feedback():
-    data = request.get_json()
+    if request.method == "OPTIONS":
+        return "", 204
+
+    data = request.get_json(silent=True) or {}
     
-    helpfulness_score = data.get("helpfulness_score")
-    guidance_style = data.get("guidance_style")
+    helpfulness_score = data.get("helpfulness_score", data.get("helpfulnessScore"))
+    guidance_style = data.get("guidance_style", data.get("guidanceStyle"))
     comment = data.get("comment")
-    session_id = data.get("session_id")
+    session_id = data.get("session_id", data.get("sessionId"))
     page_url = data.get("page_url", "")
-    form_version = data.get("form_version", "v1")
+    form_version = data.get("form_version", data.get("form_verision", "v1"))
 
     print("ENV VARS:", Project_ID, Dataset_ID, Table_ID, flush=True)
     print("TABLE REFERENCE BEING USED:", table_reference, flush=True)
@@ -47,6 +58,9 @@ def submit_feedback():
     if helpfulness_score < 1 or helpfulness_score > 5:
         return jsonify({"error": "Helpfulness score must be between 1 and 5"}), 400
     
+    if isinstance(guidance_style, str) and guidance_style.lower() == "neutral":
+        guidance_style = "neutral"
+
     if guidance_style not in ["Yes", "No", "neutral"]:
         return jsonify({"error": "Guidance style must be 'Yes', 'No', or 'neutral'"}), 400
     

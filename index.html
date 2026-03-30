@@ -155,7 +155,7 @@
     <label>Any additional comments or suggestions?</label>
     <textarea id="comment"></textarea>
 
-    <button onclick="submitFeedback()">Submit</button>
+    <button id="submit-feedback">Submit</button>
 </div>
 
 <script>
@@ -168,6 +168,7 @@
 
         const launchBtn = document.getElementById("launch-chatbot");
         const closeBtn = document.getElementById("close-chatbot");
+        const submitBtn = document.getElementById("submit-feedback");
         const chatbot = document.querySelector("df-messenger");
 
         launchBtn.addEventListener("click", () => {
@@ -205,26 +206,38 @@
 
         async function submitFeedback() {
             const payload = {
-                sessionId: sessionId,
-                helpfulnessScore: parseInt(document.getElementById("helpfulnessScore").value,10),
-                guidanceStyle: document.getElementById("guidanceStyle").value,
+                session_id: sessionId,
+                helpfulness_score: parseInt(document.getElementById("helpfulnessScore").value, 10),
+                guidance_style: document.getElementById("guidanceStyle").value.toLowerCase() === "neutral" ? "neutral" : document.getElementById("guidanceStyle").value,
                 comment: document.getElementById("comment").value,
                 page_url: window.location.href,
-                form_verision: "v1"
+                form_version: "v1"
             };
-        
 
-            const response = await fetch("https://educyber-feedback-api-142373140699.us-central1.run.app/submit-feedback", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
+            try {
+                const response = await fetch("https://educyber-feedback-api-142373140699.us-central1.run.app/submit-feedback", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            const result = await response.json();
-            console.log("Feedback submitted:", result);
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || "Feedback submission failed");
+                }
+
+                console.log("Feedback submitted:", result);
+                alert("Thanks! Your feedback was submitted successfully.");
+                document.getElementById("feedbackForm").style.display = "none";
+            } catch (error) {
+                console.error("Feedback submission failed:", error);
+                alert("Feedback could not be submitted. Check the browser console or backend logs for details.");
+            }
         }
+
+        submitBtn.addEventListener("click", submitFeedback);
     });
 </script>
 
