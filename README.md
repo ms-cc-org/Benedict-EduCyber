@@ -73,9 +73,11 @@ The agent uses structured flows to:
 This project is IRB-approved.
 
 ### Authentication
-- Users authenticate via Gmail.  
-- Gmail authentication is used for session validation only.  
+- Users authenticate via Google before launching the chatbot.  
+- Dialogflow CX Messenger uses an OAuth web client for authenticated chat access.  
+- The feedback API validates a Google ID token before accepting submissions.  
 - Email addresses are **not stored** in project datasets.  
+- A pseudonymous hash of the Google user subject is stored for research continuity.  
 
 ### Data Collection
 The system collects:
@@ -92,6 +94,62 @@ The project is designed to make collected datasets as anonymous as possible whil
 /docs --> Architecture and governance documentation
 /landing-page --> GitHub Pages site source
 /architecture --> System diagrams
+
+## Authenticated Deployment Notes
+
+This repo now assumes:
+
+- authenticated Dialogflow CX Messenger
+- authenticated feedback submission
+- pseudonymous research logging
+
+### Frontend values to replace
+
+Update the `config` object in `index.html`:
+
+- `dialogflowOauthClientId`
+  Use the OAuth 2.0 Client ID created for Dialogflow CX Messenger Authorized API.
+- `feedbackOauthClientId`
+  Use the OAuth 2.0 Client ID created for the website Google sign-in flow.
+- `feedbackApiUrl`
+  Use the deployed Cloud Run feedback endpoint.
+
+### Cloud Run environment variables
+
+Set these on the feedback API service:
+
+- `PROJECT_ID=ms-cc-benedict-college-chatbot`
+- `DATASET_ID=EduCyber_draft1_logs`
+- `TABLE_ID=EduCyber_draft1_logs_table`
+- `GOOGLE_OAUTH_CLIENT_ID=<frontend sign-in OAuth client ID>`
+- `ALLOWED_ORIGINS=<comma-separated frontend origins>`
+- `PSEUDONYM_SALT=<random secret string>`
+
+Example `ALLOWED_ORIGINS`:
+
+```text
+https://<your-github-username>.github.io,http://localhost:5500
+```
+
+### BigQuery fields required
+
+Make sure the feedback table includes these additional columns:
+
+- `auth_status` STRING
+- `auth_provider` STRING
+- `google_sub_hash` STRING
+- `user_domain` STRING
+- `identity_verified_at` TIMESTAMP or STRING
+
+### Google Cloud setup summary
+
+1. Configure the OAuth consent screen in Google Auth Platform.
+2. Create one OAuth web client for Dialogflow Messenger.
+3. Create one OAuth web client for the site sign-in flow.
+4. Add your GitHub Pages and localhost origins to both clients.
+5. Reconfigure Dialogflow CX Messenger to use Authorized API.
+6. Grant pilot users `Dialogflow API Client` and `Service Usage Consumer`.
+7. Deploy the updated feedback API with the environment variables above.
 
 
 ## License

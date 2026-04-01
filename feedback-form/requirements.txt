@@ -1,5 +1,6 @@
 Flask==3.0.3
 gunicorn==22.0.0
 google-cloud-bigquery==3.25.0
+google-auth==2.35.0
 
 #to get this basically install using pip, and after execution run pip freeze > requirements.txt to get the exact version.
