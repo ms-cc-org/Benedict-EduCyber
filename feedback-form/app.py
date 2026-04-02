@@ -18,7 +18,7 @@ Allowed_Origins = {
     origin.strip()
     for origin in os.getenv(
         "ALLOWED_ORIGINS",
-        "http://localhost:5500,http://127.0.0.1:5500"
+        "http://localhost:5500,http://127.0.0.1:5500,https://ms-cc-org.github.io"
     ).split(",")
     if origin.strip()
 }
@@ -144,7 +144,7 @@ def submit_feedback():
         "form_version": form_version,
         "auth_status": "verified",
         "auth_provider": "google",
-        "google_sub_hash": hash_google_subject(token_info["sub"]),
+        "provider_sub_hash": hash_google_subject(token_info["sub"]),
         "user_domain": token_info.get("hd", ""),
         "identity_verified_at": datetime.now(timezone.utc).isoformat()
     }
