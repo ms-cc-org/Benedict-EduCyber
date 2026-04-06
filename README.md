@@ -105,10 +105,12 @@ This repo now assumes:
 
 ### Frontend values to replace
 
-Update the `config` object in `logic.js` or `window.EDUCYBER_CONFIG`:
+Update the `config` object in `index.html`:
 
-- `googleOauthClientId`
-  Use one shared OAuth 2.0 Client ID for both the website Google sign-in flow and Dialogflow CX Messenger Authorized API. Reusing the same client prevents users from being asked to verify twice.
+- `dialogflowOauthClientId`
+  Use the OAuth 2.0 Client ID created for Dialogflow CX Messenger Authorized API.
+- `feedbackOauthClientId`
+  Use the OAuth 2.0 Client ID created for the website Google sign-in flow.
 - `feedbackApiUrl`
   Use the deployed Cloud Run feedback endpoint.
 
@@ -142,11 +144,12 @@ Make sure the feedback table includes these additional columns:
 ### Google Cloud setup summary
 
 1. Configure the OAuth consent screen in Google Auth Platform.
-2. Create one OAuth web client shared by the website sign-in flow and Dialogflow Messenger.
-3. Add your GitHub Pages and localhost origins to that client.
-4. Reconfigure Dialogflow CX Messenger to use Authorized API with the same client.
-5. Grant pilot users `Dialogflow API Client` and `Service Usage Consumer`.
-6. Deploy the updated feedback API with the environment variables above.
+2. Create one OAuth web client for Dialogflow Messenger.
+3. Create one OAuth web client for the site sign-in flow.
+4. Add your GitHub Pages and localhost origins to both clients.
+5. Reconfigure Dialogflow CX Messenger to use Authorized API.
+6. Grant pilot users `Dialogflow API Client` and `Service Usage Consumer`.
+7. Deploy the updated feedback API with the environment variables above.
 
 
 ## License

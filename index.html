@@ -17,29 +17,24 @@
         through guided, Socratic learning and interactive feedback.
         </p>
 
-        <div class="auth-panel" id="auth-panel" hidden>
-            <p class="auth-status" id="auth-status">Sign in with Google to launch the chatbot.</p>
+        <div class="auth-panel">
+            <p class="auth-status" id="auth-status">Google sign-in is required before launching the chatbot.</p>
             <div class="auth-actions">
                 <div id="google-signin"></div>
-                <button id="cancel-signin" class="auth-secondary" type="button">Cancel</button>
+                <button id="sign-out" class="auth-signout" type="button">Sign Out</button>
             </div>
-            <p class="launch-hint">After you sign in once, the chatbot opens automatically and feedback stays verified.</p>
+            <p class="launch-hint">Sign in first, then launch the authenticated chatbot and submit verified feedback.</p>
         </div>
 
-        <div class="session-panel" id="session-panel" hidden>
-            <p class="auth-status" id="session-status">Signed in.</p>
-            <button id="sign-out" class="auth-secondary auth-signout" type="button">Sign Out</button>
-        </div>
-
-        <button id="launch-chatbot" type="button">Launch Chatbot</button>
+        <button id="launch-chatbot" type="button" disabled>Launch Chatbot</button>
     </header>
 
     <section>
         <h2>How It Works</h2>
 
         <div class="steps">
-            <p>1. Select Launch Chatbot.</p>
-            <p>2. Sign in securely with Google if prompted.</p>
+            <p>1. Sign in securely using your Google account.</p>
+            <p>2. Launch the AI tutor and begin your session.</p>
             <p>3. The chatbot guides you using Socratic questioning.</p>
             <p>4. Your interaction helps improve learning and research.</p>
             <p>5. After your session, you’ll be asked to provide feedback.</p>

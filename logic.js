@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
         const config = Object.assign({
-            googleOauthClientId: "142373140699-kagadfn847u6ortgac7r9jahm126997v.apps.googleusercontent.com",
-            dialogflowOauthClientId: "",
-            feedbackOauthClientId: "",
+            dialogflowOauthClientId: "142373140699-kagadfn847u6ortgac7r9jahm126997v.apps.googleusercontent.com",
+            feedbackOauthClientId: "142373140699-tnldg3nu62udoenkne5uigj9nclhb3a7.apps.googleusercontent.com",
             feedbackApiUrl: "https://educyber-feedback-api-142373140699.us-central1.run.app/submit-feedback"
         }, window.EDUCYBER_CONFIG || {});
 
@@ -13,20 +12,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const feedbackOverlay = document.getElementById("feedbackOverlay");
         const closeFeedbackBtn = document.getElementById("close-feedback");
         const authStatus = document.getElementById("auth-status");
-        const authPanel = document.getElementById("auth-panel");
-        const sessionPanel = document.getElementById("session-panel");
-        const sessionStatus = document.getElementById("session-status");
         const googleSignin = document.getElementById("google-signin");
-        const cancelSigninBtn = document.getElementById("cancel-signin");
         const signOutBtn = document.getElementById("sign-out");
         const initialChatbotMarkup = chatbot.outerHTML;
-        const googleOauthClientId = config.googleOauthClientId || config.dialogflowOauthClientId || config.feedbackOauthClientId;
 
         let googleIdToken = sessionStorage.getItem("educyberGoogleIdToken");
         let authProfile = null;
         let sessionId = createSessionId();
-        let pendingChatLaunch = false;
-        let googleIdentityReady = false;
 
         function isConfigured(value) {
             return Boolean(value) && !value.startsWith("REPLACE_WITH_");
@@ -53,24 +45,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         function updateLaunchAvailability() {
-            launchBtn.disabled = !isConfigured(googleOauthClientId);
-        }
-
-        function hideSignInPrompt() {
-            authPanel.hidden = true;
-        }
-
-        function showSignInPrompt(message = "Sign in with Google to launch the chatbot.") {
-            authStatus.textContent = message;
-            authPanel.hidden = false;
+            const readyForChat = isConfigured(config.dialogflowOauthClientId) && Boolean(googleIdToken);
+            launchBtn.disabled = !readyForChat;
         }
 
         function setSignedOutState(message) {
             googleIdToken = null;
             authProfile = null;
             sessionStorage.removeItem("educyberGoogleIdToken");
-            sessionPanel.hidden = true;
-            showSignInPrompt(message);
+            authStatus.textContent = message;
+            signOutBtn.style.display = "none";
             updateLaunchAvailability();
         }
 
@@ -78,40 +62,14 @@ document.addEventListener("DOMContentLoaded", () => {
             googleIdToken = token;
             authProfile = profile;
             sessionStorage.setItem("educyberGoogleIdToken", token);
-            hideSignInPrompt();
-            sessionStatus.textContent = `Signed in as ${profile.email || "verified Google user"}.`;
-            sessionPanel.hidden = false;
+            authStatus.textContent = `Signed in as ${profile.email || "verified Google user"}.`;
+            signOutBtn.style.display = "inline-block";
             updateLaunchAvailability();
         }
 
-        function openChatbot() {
-            chatbot.style.display = "block";
-            closeBtn.style.display = "block";
-        }
-
-        function beginLaunchFlow() {
-            if (!isConfigured(googleOauthClientId)) {
-                alert("Google sign-in is not configured yet.");
-                return;
-            }
-
-            if (googleIdToken && !isTokenExpired(googleIdToken)) {
-                openChatbot();
-                return;
-            }
-
-            if (googleIdToken && isTokenExpired(googleIdToken)) {
-                setSignedOutState("Your session expired. Sign in again to launch the chatbot.");
-            }
-
-            pendingChatLaunch = true;
-            showSignInPrompt("Sign in once with Google and the chatbot will open automatically.");
-            googleSignin.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-
         window.initializeGoogleSignIn = function () {
-            if (!isConfigured(googleOauthClientId)) {
-                setSignedOutState("Add one shared Google OAuth client ID before testing sign-in.");
+            if (!isConfigured(config.feedbackOauthClientId)) {
+                setSignedOutState("Add your frontend Google OAuth client ID in index.html before testing sign-in.");
                 return;
             }
 
@@ -121,15 +79,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             window.google.accounts.id.initialize({
-                client_id: googleOauthClientId,
+                client_id: config.feedbackOauthClientId,
                 callback: ({ credential }) => {
                     try {
                         const profile = decodeJwtPayload(credential);
                         setSignedInState(profile, credential);
-                        if (pendingChatLaunch) {
-                            pendingChatLaunch = false;
-                            openChatbot();
-                        }
                     } catch (error) {
                         console.error("Google sign-in failed:", error);
                         setSignedOutState("Google sign-in completed, but the ID token could not be processed.");
@@ -145,16 +99,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 text: "signin_with",
                 width: 280
             });
-            googleIdentityReady = true;
         }
 
         function syncMessengerAuthConfig() {
-            if (!isConfigured(googleOauthClientId)) {
-                setSignedOutState("Add one shared Google OAuth client ID before testing the authenticated chat.");
+            if (!isConfigured(config.dialogflowOauthClientId)) {
+                setSignedOutState("Add your Dialogflow Messenger OAuth client ID in index.html before testing the authenticated chat.");
                 return;
             }
 
-            chatbot.setAttribute("oauth-client-id", googleOauthClientId);
+            chatbot.setAttribute("oauth-client-id", config.dialogflowOauthClientId);
 
             if (googleIdToken) {
                 try {
@@ -197,12 +150,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         launchBtn.addEventListener("click", () => {
-            if (!googleIdentityReady) {
-                alert("Google sign-in is still loading. Please try again in a moment.");
+            if (!googleIdToken) {
+                alert("Please sign in with Google before launching the chatbot.");
                 return;
             }
 
-            beginLaunchFlow();
+            if (isTokenExpired(googleIdToken)) {
+                alert("Your Google sign-in expired. Please sign in again before launching the chatbot.");
+                setSignedOutState("Your session expired. Please sign in again.");
+                return;
+            }
+
+            chatbot.style.display = "block";
+            closeBtn.style.display = "block";
         });
 
         closeBtn.addEventListener("click", () => {
@@ -299,13 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.google.accounts.id.disableAutoSelect();
             }
 
-            pendingChatLaunch = false;
-            setSignedOutState("Signed out. Select Launch Chatbot to sign in again.");
-        });
-
-        cancelSigninBtn.addEventListener("click", () => {
-            pendingChatLaunch = false;
-            hideSignInPrompt();
+            setSignedOutState("Signed out. Sign in again to launch the chatbot.");
         });
 
         syncMessengerAuthConfig();
