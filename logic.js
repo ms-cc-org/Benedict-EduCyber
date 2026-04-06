@@ -8,15 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const launchBtn = document.getElementById("launch-chatbot");
         const closeBtn = document.getElementById("close-chatbot");
         const submitBtn = document.getElementById("submit-feedback");
-        const chatbot = document.querySelector("df-messenger");
+        let chatbot = document.querySelector("df-messenger");
         const feedbackOverlay = document.getElementById("feedbackOverlay");
         const closeFeedbackBtn = document.getElementById("close-feedback");
         const authStatus = document.getElementById("auth-status");
         const googleSignin = document.getElementById("google-signin");
         const signOutBtn = document.getElementById("sign-out");
+        const initialChatbotMarkup = chatbot.outerHTML;
 
         let googleIdToken = sessionStorage.getItem("educyberGoogleIdToken");
         let authProfile = null;
+        let sessionId = createSessionId();
 
         function isConfigured(value) {
             return Boolean(value) && !value.startsWith("REPLACE_WITH_");
@@ -120,9 +122,30 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        function createSessionId() {
+            return "user-" + crypto.randomUUID();
+        }
+
+        function resetChatbotSession() {
+            const freshChatbot = document.createElement("div");
+            freshChatbot.innerHTML = initialChatbotMarkup.trim();
+            chatbot.replaceWith(freshChatbot.firstElementChild);
+            chatbot = document.querySelector("df-messenger");
+            chatbot.style.display = "none";
+            sessionId = createSessionId();
+            syncMessengerAuthConfig();
+        }
+
+        function closeChatSession() {
+            chatbot.style.display = "none";
+            closeBtn.style.display = "none";
+            openFeedbackForm();
+            resetChatbotSession();
+        }
+
         window.addEventListener("df-chat-open-changed", (event) => {
-            if (!event.detail.isOpen) {
-                openFeedbackForm();
+            if (!event.detail || !event.detail.isOpen) {
+                closeChatSession();
             }
         });
 
@@ -146,25 +169,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const confirmClose = confirm("Are you sure you want to close the chat?");
 
             if (confirmClose) {
-                chatbot.style.display = "none";
-                closeBtn.style.display = "none";
-
                 window.dispatchEvent(new CustomEvent("df-chat-open-changed", {
                     detail: { isOpen: false }
                 }));
             }
         });
-
-        function getOrCreateSessionId() {
-            let sessionId = localStorage.getItem("sessionId");
-            if (!sessionId) {
-                sessionId = "user-" + crypto.randomUUID();
-                localStorage.setItem("sessionId", sessionId);
-            }
-            return sessionId;
-        }
-
-        const sessionId = getOrCreateSessionId();
 
         function openFeedbackForm() {
             feedbackOverlay.classList.add("active");
@@ -252,8 +261,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             setSignedOutState("Signed out. Sign in again to launch the chatbot.");
         });
-
-        syncMessengerAuthConfig();
 
         syncMessengerAuthConfig();
 
