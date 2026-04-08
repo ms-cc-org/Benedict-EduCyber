@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let googleIdToken = sessionStorage.getItem("educyberGoogleIdToken");
         let authProfile = null;
         let sessionId = createSessionId();
-        let launchAfterSignIn = false;
 
         function isConfigured(value) {
             return Boolean(value) && !value.startsWith("REPLACE_WITH_");
@@ -46,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         function updateLaunchAvailability() {
-            launchBtn.disabled = !isConfigured(config.dialogflowOauthClientId);
+            const readyForChat = isConfigured(config.dialogflowOauthClientId) && Boolean(googleIdToken);
+            launchBtn.disabled = !readyForChat;
         }
 
         function setSignedOutState(message) {
@@ -84,11 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     try {
                         const profile = decodeJwtPayload(credential);
                         setSignedInState(profile, credential);
-
-                        if (launchAfterSignIn) {
-                            launchAfterSignIn = false;
-                            openChatbot();
-                        }
                     } catch (error) {
                         console.error("Google sign-in failed:", error);
                         setSignedOutState("Google sign-in completed, but the ID token could not be processed.");
@@ -141,11 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
             syncMessengerAuthConfig();
         }
 
-        function openChatbot() {
-            chatbot.style.display = "block";
-            closeBtn.style.display = "block";
-        }
-
         function closeChatSession() {
             chatbot.style.display = "none";
             closeBtn.style.display = "none";
@@ -161,13 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         launchBtn.addEventListener("click", () => {
             if (!googleIdToken) {
-                if (window.google && window.google.accounts && window.google.accounts.id) {
-                    launchAfterSignIn = true;
-                    window.google.accounts.id.prompt();
-                    authStatus.textContent = "Please complete Google sign-in to launch the chatbot.";
-                } else {
-                    alert("Google signin is loading. Please try again.");
-                }
+                alert("Please sign in with Google before launching the chatbot.");
                 return;
             }
 
@@ -177,7 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            openChatbot();
+            chatbot.style.display = "block";
+            closeBtn.style.display = "block";
         });
 
         closeBtn.addEventListener("click", () => {
