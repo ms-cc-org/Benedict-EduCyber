@@ -139,6 +139,10 @@
         gap: 12px;
     }
 
+    #google-signin {
+        display: none;
+    }
+    
     .auth-signout {
         display: none;
         background: transparent;
