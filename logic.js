@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         function setSignedInState(profile, token) {
             googleIdToken = token;
             authProfile = profile;
+            launchAfterSignIn = false;
             sessionStorage.setItem("educyberGoogleIdToken", token);
             authStatus.textContent = `Signed in as ${profile.email || "verified Google user"}.`;
             signOutBtn.style.display = "inline-block";
