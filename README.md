@@ -29,6 +29,8 @@ Future phases may include:
 
 ## High-Level Architecture
 
+![Updated archietecture of the complete workflow with explanations](architecture/New-reference-architecture.jpg)
+
 ### User Flow
 
 1. User accesses chatbot via a shared link  
@@ -105,7 +107,7 @@ This repo now assumes:
 
 ### Frontend values to replace
 
-Update the `config` object in `index.html`:
+Update the `config` object in `logic.js`:
 
 - `dialogflowOauthClientId`
   Use the OAuth 2.0 Client ID created for Dialogflow CX Messenger Authorized API.
@@ -116,7 +118,7 @@ Update the `config` object in `index.html`:
 
 ### Cloud Run environment variables
 
-Set these on the feedback API service:
+Set these on the feedback API service in `feedback-form/app.py` and 'feedback-form/env.yaml':
 
 - `PROJECT_ID=ms-cc-benedict-college-chatbot`
 - `DATASET_ID=EduCyber_draft1_logs`
